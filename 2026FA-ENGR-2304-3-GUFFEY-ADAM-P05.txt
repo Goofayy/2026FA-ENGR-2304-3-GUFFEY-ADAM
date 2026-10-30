@@ -1,0 +1,20 @@
+/* 2026FA-ENGR-2304-3-GUFFEY-ADAM-P05
+ * Arduino UNO with a 16 x 2 I2C LCD (MCP23008, address 0x20).
+ * LCD GND -> UNO GND; VCC -> 5V; SDA -> A4; SCL -> A5.
+ */
+#include <Adafruit_LiquidCrystal.h>
+
+Adafruit_LiquidCrystal lcd(0); // Address offset 0 selects 0x20.
+
+void setup()
+{
+    lcd.begin(16, 2);
+    lcd.setBacklight(1);
+    lcd.setCursor(0, 0);
+    lcd.print("Hello World");
+}
+
+void loop()
+{
+    // The message remains on the LCD.
+}

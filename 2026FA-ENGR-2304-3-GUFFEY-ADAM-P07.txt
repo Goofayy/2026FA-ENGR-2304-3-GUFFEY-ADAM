@@ -1,0 +1,168 @@
+2026FA-ENGR-2304-3-GUFFEY-ADAM-P07
+
+
+the prompt given to ChatGPT was just that of the assignment itself. ChatGPT was able to code this completely without any other "guidance" by me (as if I could give it guidance). This means I was left to just learning from the AI with questions such as:
+what is windows.h? is it essential to this program?
+what is #ifdef?
+explain the int getNumber function please.
+
+HERE IS THE CODE:
+
+/* Tic-Tac-Toe - Created with ChatGPT assistance.
+   Choose 1 player against the computer or 2 human players.
+   Enter the number of an empty square to make a move.
+   Compile: gcc TicTacToe.c -o TicTacToe
+*/
+#include <stdio.h>
+#include <stdlib.h>
+#include <time.h>
+
+#ifdef _WIN32
+#include <windows.h>
+#else
+#include <unistd.h>
+#endif
+
+/* Read a whole number and reject invalid or out-of-range input. */
+int getNumber(const char *prompt, int minimum, int maximum)
+{
+    char input[100], extra;
+    int number, ch;
+
+    while (1) {
+        printf("%s", prompt);
+        fflush(stdout);
+        if (fgets(input, sizeof(input), stdin) == NULL) {
+            printf("\nGame ended.\n");
+            exit(0);
+        }
+
+        /* Discard an input line that is too long for the buffer. */
+        if (input[0] != '\0') {
+            int i = 0;
+            while (input[i] != '\0' && input[i] != '\n')
+                i++;
+            if (input[i] != '\n' && !feof(stdin)) {
+                while ((ch = getchar()) != '\n' && ch != EOF) { }
+                printf("Input too long. Try again.\n");
+                continue;
+            }
+        }
+
+        if (sscanf(input, "%d %c", &number, &extra) == 1 &&
+            number >= minimum && number <= maximum)
+            return number;
+
+        printf("Enter a whole number from %d to %d.\n", minimum, maximum);
+    }
+}
+
+void showBoard(const char board[])
+{
+    printf("\n %c | %c | %c\n", board[0], board[1], board[2]);
+    printf("---+---+---\n");
+    printf(" %c | %c | %c\n", board[3], board[4], board[5]);
+    printf("---+---+---\n");
+    printf(" %c | %c | %c\n\n", board[6], board[7], board[8]);
+}
+
+/* Return X or O for a winner, or a space if neither has won. */
+char checkWinner(const char board[])
+{
+    int lines[8][3] = {
+        {0, 1, 2}, {3, 4, 5}, {6, 7, 8},
+        {0, 3, 6}, {1, 4, 7}, {2, 5, 8},
+        {0, 4, 8}, {2, 4, 6}
+    };
+    int i;
+
+    for (i = 0; i < 8; i++) {
+        char mark = board[lines[i][0]];
+        if ((mark == 'X' || mark == 'O') &&
+            mark == board[lines[i][1]] &&
+            mark == board[lines[i][2]])
+            return mark;
+    }
+    return ' ';
+}
+
+void pauseOneSecond(void)
+{
+    fflush(stdout);
+#ifdef _WIN32
+    Sleep(1000);
+#else
+    sleep(1);
+#endif
+}
+
+int main(void)
+{
+    char board[9], player1, player2, current, winner;
+    int players, choice, square, moves, again, i;
+
+    srand((unsigned int)time(NULL));
+    printf("TIC-TAC-TOE\n");
+
+    do {
+        players = getNumber("Number of players (1 or 2): ", 1, 2);
+        choice = getNumber("Player 1: choose 1 for X or 2 for O: ", 1, 2);
+        player1 = (choice == 1) ? 'X' : 'O';
+        player2 = (player1 == 'X') ? 'O' : 'X';
+        printf("Player 1 is %c. %s is %c.\n", player1,
+               players == 1 ? "Computer" : "Player 2", player2);
+
+        for (i = 0; i < 9; i++)
+            board[i] = (char)('1' + i);
+        moves = 0;
+        winner = ' ';
+        current = (rand() % 2 == 0) ? player1 : player2;
+
+        printf("Random first turn: %s (%c).\n",
+               current == player1 ? "Player 1" :
+               (players == 1 ? "Computer" : "Player 2"), current);
+        showBoard(board);
+
+        while (moves < 9 && winner == ' ') {
+            if (players == 1 && current == player2) {
+                printf("Computer (%c) is thinking...\n", current);
+                pauseOneSecond();
+                /* Randomly choose an empty square. */
+                do {
+                    square = rand() % 9;
+                } while (board[square] == 'X' || board[square] == 'O');
+                printf("Computer chooses square %d.\n", square + 1);
+            } else {
+                printf("Player %d (%c), your turn.\n",
+                       current == player1 ? 1 : 2, current);
+                do {
+                    square = getNumber("Choose a square (1-9): ", 1, 9) - 1;
+                    if (board[square] == 'X' || board[square] == 'O')
+                        printf("That square is occupied. Try again.\n");
+                    else
+                        break;
+                } while (1);
+            }
+
+            board[square] = current;
+            moves++;
+            showBoard(board);
+            winner = checkWinner(board);
+            current = (current == 'X') ? 'O' : 'X';
+        }
+
+        if (winner == ' ')
+            printf("The game is a draw!\n");
+        else if (winner == player1)
+            printf("Player 1 (%c) wins!\n", winner);
+        else
+            printf("%s (%c) wins!\n",
+                   players == 1 ? "Computer" : "Player 2", winner);
+
+        again = getNumber("Play again? (1 = yes, 0 = end): ", 0, 1);
+        printf("\n");
+    } while (again == 1);
+
+    printf("Thanks for playing!\n");
+    return 0;
+}

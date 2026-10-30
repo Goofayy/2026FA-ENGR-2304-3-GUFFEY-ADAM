@@ -1,0 +1,8 @@
+//2026FA-ENGR-2304-3-GUFFEY-ADAM-P00
+//assuming this will be the shortest executable code as "Hello World" is the next program assignment
+
+#include <stdio.h>
+
+int main() {
+    return 0;
+}
